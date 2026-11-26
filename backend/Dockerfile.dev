@@ -1,5 +1,5 @@
 FROM node:24-alpine
-
+# added this for demo purpose
 WORKDIR /app
 
 # Install dependencies first for better layer caching
