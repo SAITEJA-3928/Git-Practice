@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 
+#added for check
+
 # Environment & Secrets
 .env
 .env.*
