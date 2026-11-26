@@ -1,0 +1,17 @@
+FROM node:24-alpine
+
+WORKDIR /app
+
+# Install dependencies first for better layer caching
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+ENV NODE_ENV=development
+ENV PORT=5000
+
+EXPOSE 5000
+
+# nodemon -L uses polling so file edits inside VMs / Docker bind mounts trigger reload
+CMD ["npm", "run", "dev"]

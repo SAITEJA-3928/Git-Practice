@@ -1,0 +1,50 @@
+# Use this compose file when MongoDB runs directly on your Virtual Machine OS
+# (not inside a container), while Node.js backend + React frontend run in Docker.
+#
+# Example:
+#   VM_MONGO_URI="mongodb://192.168.56.101:27017/flipkart_dev" docker compose -f docker-compose.vm-mongo.yml up --build
+# Or if MongoDB runs on the same VM host as Docker:
+#   docker compose -f docker-compose.vm-mongo.yml up --build
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: flipkart-backend-vm-dev
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      PORT: 5000
+      NODE_ENV: development
+      MONGO_URI: ${VM_MONGO_URI:-mongodb://host.docker.internal:27017/flipkart_dev}
+      JWT_SECRET: dev_super_secret_change_me
+      CLIENT_ORIGIN: "*"
+      AUTO_SEED: "true"
+    volumes:
+      - ./backend:/app
+      - backend_vm_node_modules:/app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: flipkart-frontend-vm-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_PROXY_TARGET: http://backend:5000
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - frontend_vm_node_modules:/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  backend_vm_node_modules:
+  frontend_vm_node_modules:
